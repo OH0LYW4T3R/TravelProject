@@ -1,5 +1,10 @@
 package com.ll.travelmate.user;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.ll.travelmate.block.BlockDto;
 import com.ll.travelmate.friend.FriendDto;
 import com.ll.travelmate.guide.GuideDto;
@@ -18,7 +23,7 @@ import java.util.List;
 @Setter
 @ToString
 public class TravelUserDto {
-    // 요청 응답시 유용하게 사용되는 DTO
+    // 요청 응답시 유용하게 사용되는 DTO (직렬화 역직렬화 대신해주는 것이라고 생각하면 됨.)
     private Long travelUserId;
     @NotNull(message = "Name is required")
     private String name;
@@ -31,6 +36,9 @@ public class TravelUserDto {
     private String phoneNumber;
     private String imageUrl;
     private String introduction;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
 
     // 연관된 엔티티 DTO

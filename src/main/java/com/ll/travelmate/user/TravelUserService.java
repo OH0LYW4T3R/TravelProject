@@ -58,6 +58,8 @@ public class TravelUserService {
         memberDto.setEmail(member.getEmail());
         memberDto.setPassword("[PRIVATE]");
 
+        dto.setMember(memberDto);
+
         System.out.println(memberDto.toString());
         System.out.println(dto.toString());
 

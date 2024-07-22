@@ -1,5 +1,6 @@
 package com.ll.travelmate.user;
 
+import com.ll.travelmate.request.UserRegistrationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

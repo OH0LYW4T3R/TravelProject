@@ -36,7 +36,7 @@ public class TravelUser {
     private LocalDateTime createdAt;
 
     // mappedBy 지정시 연관관계 주인에게만 외부키가 보이며 자신의 테이블에서는 보이지 않는다.
-    @OneToOne(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // mappedBy에 연관관계의 주인 필드 이름을 넣어주면 된다.
+    @OneToOne(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.EAGER) // mappedBy에 연관관계의 주인 필드 이름을 넣어주면 된다.
     @ToString.Exclude
     private Member member;
     @OneToOne(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

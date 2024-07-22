@@ -1,6 +1,7 @@
-package com.ll.travelmate.user;
+package com.ll.travelmate.request;
 
 import com.ll.travelmate.member.MemberDto;
+import com.ll.travelmate.user.TravelUserDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
