@@ -1,5 +1,6 @@
 package com.ll.travelmate.user;
 
+import com.ll.travelmate.member.CustomMember;
 import com.ll.travelmate.member.Member;
 import com.ll.travelmate.member.MemberDto;
 import com.ll.travelmate.member.MemberRepository;
@@ -7,6 +8,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +45,28 @@ public class TravelUserService {
         // 나중에 다른 엔티티를 추가하거나 업데이트할 수 있습니다.
         return convertToDto(travelUser, member);
     }
+
+    @Transactional
+    public TravelUserDto readTravelUser(CustomMember customMember) {
+        if (customMember == null)
+            return null;
+
+        Optional<TravelUser> optionalTravelUser = travelUserRepository.findById(customMember.getTravelUserId());
+
+        return optionalTravelUser.map(travelUser -> convertToDto(travelUser, travelUser.getMember())).orElse(null);
+    }
+
+    @Transactional
+    public List<TravelUserDto> getTravelUsersByIds(List<Long> travelUserIds) {
+        List<TravelUserDto> travelUserDtos = new ArrayList<>();
+        List<TravelUser> travelUsers = travelUserRepository.findByTravelUserIdIn(travelUserIds);
+
+        for (TravelUser travelUser : travelUsers) {
+            travelUserDtos.add(convertToDto(travelUser, travelUser.getMember()));
+        }
+
+        return travelUserDtos;
+    }
     private TravelUserDto convertToDto(TravelUser travelUser, Member member) {
         TravelUserDto dto = new TravelUserDto();
         MemberDto memberDto = new MemberDto();
@@ -65,4 +92,6 @@ public class TravelUserService {
 
         return dto;
     }
+
+
 }
