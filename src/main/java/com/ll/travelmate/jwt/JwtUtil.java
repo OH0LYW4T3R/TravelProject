@@ -69,6 +69,9 @@ public class JwtUtil {
         cookie.setPath("/");
         response.addCookie(cookie);
 
+        response.addHeader("Set-Cookie", String.format("%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
+        cookie.getName(), cookie.getValue(), cookie.getMaxAge()));
+
         System.out.println("createJwtToken func : " + jwt);
 
         return jwt;
@@ -92,6 +95,9 @@ public class JwtUtil {
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);
+
+        response.addHeader("Set-Cookie", String.format("%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
+        refreshTokenCookie.getName(), refreshTokenCookie.getValue(), refreshTokenCookie.getMaxAge()));
 
         System.out.println("createJwtRefreshToken func : " + jwtRefresh);
 
