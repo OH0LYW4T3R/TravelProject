@@ -24,6 +24,11 @@ public class JwtFilter extends OncePerRequestFilter {
     private final MemberRepository memberRepository;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if ("/login".equals(request.getRequestURI()) || "/travel-user/creation".equals(request.getRequestURI())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
@@ -54,7 +59,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 claim = jwtUtil.extractToken(newJwt);
             } catch (Exception ex) {
                 System.out.println("리프레시 토큰이 만료되었거나, 유효하지 않음.");
-                filterChain.doFilter(request, response);
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "리프레시 토큰이 만료되었거나, 유효하지 않음.");
                 return;
             }
         }

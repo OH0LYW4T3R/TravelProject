@@ -12,7 +12,7 @@ import java.util.Collection;
 @Setter
 @ToString
 public class CustomMember extends User {
-    private Long id;
+    private Long id; // memberId
     private Long travelUserId;
     public CustomMember(
             String username,

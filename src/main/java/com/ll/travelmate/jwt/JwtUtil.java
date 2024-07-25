@@ -48,6 +48,7 @@ public class JwtUtil {
     }
 
     public String createToken(Authentication auth, HttpServletResponse response) {
+        System.out.println(auth.toString());
         CustomMember customMember = (CustomMember) auth.getPrincipal();
         String authorities = auth.getAuthorities().stream()
                 .map(a -> a.getAuthority()).collect(Collectors.joining(","));
@@ -97,6 +98,7 @@ public class JwtUtil {
         return jwtRefresh;
     }
     public Claims extractToken(String token) {
+        // 변조하면 서명이 일치하지 않게 되므로, 검증시 오류남
         Claims claims = Jwts.parser().verifyWith(this.key).build()
             .parseSignedClaims(token).getPayload();
 

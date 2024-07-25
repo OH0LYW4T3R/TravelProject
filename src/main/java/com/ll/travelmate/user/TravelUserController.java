@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -15,10 +17,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TravelUserController {
     private final TravelUserService travelUserService;
+    private final RestTemplate restTemplate;
 
     @PostMapping("/creation")
     // request를 받을때는 순서는 상관 없지만, dto에 있는 이름 그대로 키를 설정해야 한다.
-    public ResponseEntity<Object> createUser(@RequestBody UserRegistrationRequest userRegistrationRequest) {
+    public ResponseEntity<Object> createTravelUser(@RequestBody UserRegistrationRequest userRegistrationRequest) {
         // 생성시 휴대폰 인증 부분도 생각해야할듯
         TravelUserDto createdUserDto = travelUserService.createUserAndMember(
                 userRegistrationRequest.getTravelUserDto(),
@@ -27,16 +30,41 @@ public class TravelUserController {
         return new ResponseEntity<>(createdUserDto, HttpStatus.CREATED);
     }
 
-    @PostMapping("/recommendation-list")
-    public ResponseEntity<List<TravelUserDto>> getRecommendedList(@RequestBody List<Long> travelUserIds) {
-        List<TravelUserDto> travelUserDtos = travelUserService.getTravelUsersByIds(travelUserIds);
+    @GetMapping("/recommendation-list")
+    public ResponseEntity<Object> getRecommendedList(Authentication auth) {
+        String uri = "persona/recommend/";
+        String keyName = "list";
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        List<TravelUserDto> travelUserDtos = new ArrayList<>();
+
+        try {
+            travelUserDtos = travelUserService.findRecommendedTravelUsers(uri + String.valueOf(customMember.getTravelUserId()), keyName);
+        } catch (Exception exception) {
+            return new ResponseEntity<>("Server Error", HttpStatus.valueOf(500));
+        }
+
         return new ResponseEntity<>(travelUserDtos, HttpStatus.OK);
     }
 
     @GetMapping("/reading")
-    public ResponseEntity<Object> readUser(Authentication auth) {
+    public ResponseEntity<Object> readTravelUser(Authentication auth) {
         CustomMember customMember = (CustomMember) auth.getPrincipal();
         TravelUserDto travelUserDto = travelUserService.readTravelUser(customMember);
         return new ResponseEntity<>(travelUserDto, HttpStatus.OK);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<Object> updateTravelUser(Authentication auth, @RequestBody TravelUserDto travelUserDto) {
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        TravelUserDto updateTravelUserDto = travelUserService.updateTravelUser(customMember.getTravelUserId(), travelUserDto);
+        return new ResponseEntity<>(updateTravelUserDto, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deletion")
+    public ResponseEntity<Object> deleteTravelUser(Authentication auth) {
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        // 상대방에게 걸려온 친추도 없애는 로직 추가
+        travelUserService.deleteTravelUser(customMember.getTravelUserId());
+        return new ResponseEntity<>("Delete Success", HttpStatus.NO_CONTENT);
     }
 }
