@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+    private final MemberRepository memberRepository;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtUtil jwtUtil;
 
@@ -29,5 +30,9 @@ public class MemberService {
         String jwtRefresh = jwtUtil.createRefreshToken(auth2, response);
 
         return jwtUtil.convertToDto(jwt, jwtRefresh);
+    }
+
+    public void changePassword(MemberDto memberDto) {
+        memberRepository.findByEmail(memberDto.getEmail());
     }
 }

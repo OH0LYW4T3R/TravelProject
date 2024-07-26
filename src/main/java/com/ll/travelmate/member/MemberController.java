@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +21,11 @@ public class MemberController {
         JwtDto jwtDto = memberService.jwtCreate(memberDto, response);
         return new ResponseEntity<>(jwtDto, HttpStatus.OK);
     }
+
+//    @PatchMapping("/password-lost")
+//    public ResponseEntity<Object> changePassword(@RequestBody MemberDto memberDto) {
+//
+//    }
 
     @GetMapping("/test")
     @Transactional

@@ -65,12 +65,13 @@ public class JwtUtil {
 
         Cookie cookie = new Cookie(JwtSettingUtil.JWTTOKENNAME, jwt);
         cookie.setMaxAge(JwtSettingUtil.COOKIEMAXAGE);
+        cookie.setSecure(true);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         response.addCookie(cookie);
 
         response.addHeader("Set-Cookie", String.format("%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
-        cookie.getName(), cookie.getValue(), cookie.getMaxAge()));
+        cookie.getName(), cookie.getValue(), cookie.getMaxAge())); // SameSite 속성 공부하기
 
         System.out.println("createJwtToken func : " + jwt);
 
@@ -92,12 +93,13 @@ public class JwtUtil {
 
         Cookie refreshTokenCookie = new Cookie(JwtSettingUtil.JWTREFRESHTOKENNAME, jwtRefresh);
         refreshTokenCookie.setMaxAge(JwtSettingUtil.REFRESHCOOKIEMAXAGE);
+        refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);
 
         response.addHeader("Set-Cookie", String.format("%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
-        refreshTokenCookie.getName(), refreshTokenCookie.getValue(), refreshTokenCookie.getMaxAge()));
+        refreshTokenCookie.getName(), refreshTokenCookie.getValue(), refreshTokenCookie.getMaxAge())); // SameSite 속성 공부하기
 
         System.out.println("createJwtRefreshToken func : " + jwtRefresh);
 
