@@ -201,9 +201,15 @@ public class FriendService {
                         travelUserOptional.get(),
                         FriendStatus.acceptance
                 );
+                Optional<Friend> blokedFriendtoTravelUserOptional = friendRepository.findByTravelUserAndFriendTravelUserAndFriendStatus(
+                        friendTravelUserOptional.get(),
+                        travelUserOptional.get(),
+                        FriendStatus.block
+                );
 
                 travelUserToFrinedOptional.ifPresent(friendRepository::delete);
                 friendtoTravelUserOptional.ifPresent(friendRepository::delete);
+                blokedFriendtoTravelUserOptional.ifPresent(friendRepository::delete);
                 break;
             case request:
                 travelUserToFrinedOptional = friendRepository.findByTravelUserAndFriendTravelUserAndFriendStatus(
@@ -230,6 +236,75 @@ public class FriendService {
                 travelUserToFrinedOptional.ifPresent(friendRepository::delete);
                 break;
         }
+    }
+
+    @Transactional
+    public FriendDto blockedFriend(Long travelUserId, FriendDto friendDto) {
+        if (equalTravelUserId(travelUserId, friendDto.getFriendTravelUserId()) == 1)
+            return null;
+
+        Optional<TravelUser> friendTravelUserOptional = travelUserRepository.findById(friendDto.getFriendTravelUserId());
+
+        if (friendTravelUserOptional.isEmpty()) // 이미 계정을 삭제해서 상대방이 없는 상태
+            return null;
+
+        Optional<TravelUser> travelUserOptional = travelUserRepository.findById(travelUserId);
+        Optional<Friend> friendOptional = friendRepository.findByTravelUserAndFriendTravelUserAndFriendStatus(
+                travelUserOptional.get(),
+                friendTravelUserOptional.get(),
+                FriendStatus.acceptance
+        );
+        Optional<Friend> reverseAcceptanceFriendOptional = friendRepository.findByTravelUserAndFriendTravelUserAndFriendStatus(
+                friendTravelUserOptional.get(),
+                travelUserOptional.get(),
+                FriendStatus.acceptance
+        );
+        Optional<Friend> reverseBlockedFriendOptional = friendRepository.findByTravelUserAndFriendTravelUserAndFriendStatus(
+                friendTravelUserOptional.get(),
+                travelUserOptional.get(),
+                FriendStatus.block
+        );
+
+        if (friendOptional.isEmpty()) // 친구추가가 되지 않은 상대 or 이미 차단한 상대
+            return null;
+
+        // 이론상 여기 까지 올 수 없음
+        if (reverseBlockedFriendOptional.isEmpty() && reverseAcceptanceFriendOptional.isEmpty())
+            return null; // 친추한거를 삭제했거나, 차단한거를 삭제했거나
+
+
+        friendOptional.get().setFriendStatus(FriendStatus.block);
+        friendRepository.save(friendOptional.get());
+
+        // 차단이 불가능한 상황이거나, 이미 차단한 상대입니다.
+        return convertFriendDto(friendOptional.get().getTravelUser(), friendOptional.get().getFriendTravelUser(), FriendStatus.block);
+    }
+
+    @Transactional
+    public FriendDto unblockedFriend(Long travelUserId, FriendDto friendDto) {
+        if (equalTravelUserId(travelUserId, friendDto.getFriendTravelUserId()) == 1)
+            return null;
+
+        Optional<TravelUser> friendTravelUserOptional = travelUserRepository.findById(friendDto.getFriendTravelUserId());
+
+        if (friendTravelUserOptional.isEmpty()) // 이미 계정을 삭제해서 상대방이 없는 상태
+            return null;
+
+        Optional<TravelUser> travelUserOptional = travelUserRepository.findById(travelUserId);
+        Optional<Friend> friendOptional = friendRepository.findByTravelUserAndFriendTravelUserAndFriendStatus(
+                travelUserOptional.get(),
+                friendTravelUserOptional.get(),
+                FriendStatus.block
+        );
+
+        if (friendOptional.isEmpty()) // 이미 차단해제한 상태, 친구가 이미 친구를 삭제한 상황
+            return null;
+
+        friendOptional.get().setFriendStatus(FriendStatus.acceptance);
+        friendRepository.save(friendOptional.get());
+
+        // 차단해제가 불가능한 상태거나, 친구가 이미 친구를 삭제하였습니다.
+        return convertFriendDto(friendOptional.get().getTravelUser(), friendOptional.get().getFriendTravelUser(), FriendStatus.acceptance);
     }
 
     public FriendDto convertFriendDto(TravelUser travelUser, TravelUser friendTravelUser, FriendStatus friendStatus) {

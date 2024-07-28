@@ -66,7 +66,7 @@ public class JwtUtil {
         Cookie cookie = new Cookie(JwtSettingUtil.JWTTOKENNAME, jwt);
         cookie.setMaxAge(JwtSettingUtil.COOKIEMAXAGE);
         cookie.setSecure(true);
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
         cookie.setPath("/");
         response.addCookie(cookie);
 
@@ -94,7 +94,7 @@ public class JwtUtil {
         Cookie refreshTokenCookie = new Cookie(JwtSettingUtil.JWTREFRESHTOKENNAME, jwtRefresh);
         refreshTokenCookie.setMaxAge(JwtSettingUtil.REFRESHCOOKIEMAXAGE);
         refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setHttpOnly(false);
         refreshTokenCookie.setPath("/");
         response.addCookie(refreshTokenCookie);
 
