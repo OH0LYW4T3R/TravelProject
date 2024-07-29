@@ -66,6 +66,7 @@ public class JwtUtil {
           .compact();
 
         ResponseCookie cookie = ResponseCookie.from(JwtSettingUtil.JWTTOKENNAME, jwt)
+                .domain("https://web-adventure-time-lxhy8g9qc44319ad.sel5.cloudtype.app/")
             .maxAge(JwtSettingUtil.COOKIEMAXAGE)
             .secure(true)
             .httpOnly(false)
@@ -104,6 +105,7 @@ public class JwtUtil {
           .compact();
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from(JwtSettingUtil.JWTREFRESHTOKENNAME, jwtRefresh)
+                .domain("https://web-adventure-time-lxhy8g9qc44319ad.sel5.cloudtype.app/")
             .maxAge(JwtSettingUtil.REFRESHCOOKIEMAXAGE)
             .secure(true)
             .httpOnly(false)
