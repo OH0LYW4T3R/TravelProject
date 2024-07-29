@@ -24,9 +24,6 @@ public class Guide {
     @Min(0)
     @Max(5)
     private Double rating;
-    @Min(0)
-    @Max(100)
-    private Double acceptRate;
     private String name;
     @Enumerated(EnumType.STRING)
     private Gender gender;

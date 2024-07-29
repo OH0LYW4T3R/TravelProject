@@ -18,7 +18,7 @@ import java.util.List;
 public class TravelUserController {
     private final TravelUserService travelUserService;
     private final RestTemplate restTemplate;
-
+    private final TravelUserRepository travelUserRepository;
     @PostMapping("/creation")
     // request를 받을때는 순서는 상관 없지만, dto에 있는 이름 그대로 키를 설정해야 한다.
     public ResponseEntity<Object> createTravelUser(@RequestBody UserRegistrationRequest userRegistrationRequest) {
@@ -66,5 +66,21 @@ public class TravelUserController {
         // 상대방에게 걸려온 친추도 없애는 로직 추가
         travelUserService.deleteTravelUser(customMember.getTravelUserId());
         return new ResponseEntity<>("Delete Success", HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/recommend/test")
+    public ResponseEntity<Object> testRecommend(Authentication auth) {
+        List<TravelUserDto> travelUserDtos = new ArrayList<>();
+        List<Long> ids = new ArrayList<>();
+        ids.add(1L);
+        ids.add(2L);
+        ids.add(3L);
+        ids.add(5L);
+
+        for (Long id : ids) {
+            travelUserDtos.add(travelUserService.convertToDto(travelUserRepository.findById(id).get(), null));
+        }
+
+        return new ResponseEntity<>(travelUserDtos, HttpStatus.OK);
     }
 }

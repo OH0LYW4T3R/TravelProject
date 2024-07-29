@@ -3,6 +3,8 @@ package com.ll.travelmate.user;
 import com.ll.travelmate.friend.Friend;
 import com.ll.travelmate.friend.FriendRepository;
 import com.ll.travelmate.friend.FriendStatus;
+import com.ll.travelmate.guide.Guide;
+import com.ll.travelmate.guide.GuideRepository;
 import com.ll.travelmate.member.CustomMember;
 import com.ll.travelmate.member.Member;
 import com.ll.travelmate.member.MemberDto;
@@ -27,6 +29,7 @@ public class TravelUserService {
     private final TravelUserRepository travelUserRepository;
     private final MemberRepository memberRepository;
     private final FriendRepository friendRepository;
+    private final GuideRepository guideRepository;
     private final PasswordEncoder passwordEncoder;
     private final RestTemplate restTemplate;
 
@@ -75,7 +78,7 @@ public class TravelUserService {
         TravelUser travelUser = new TravelUser();
         Member member = new Member();
         Friend friend = new Friend();
-        List<Friend> friends = new ArrayList<>();
+        Guide guide = new Guide();
 
         travelUser.setName(travelUserDto.getName());
         travelUser.setGender(travelUserDto.getGender());
@@ -94,13 +97,23 @@ public class TravelUserService {
 
         // Block 생성
 
+        // Guide 생성
+        guide.setAge(travelUserDto.getAge());
+        guide.setName(travelUserDto.getName());
+        guide.setGender(travelUserDto.getGender());
+        guide.setArea(travelUserDto.getAddress());
+        guide.setRating(0.0);
+        guide.setTravelUser(travelUser);
+
         // TravelUser와 연결
         travelUser.setMember(member);
-        travelUser.setFriends(friends);
+        travelUser.setGuide(guide);
 
         // DB 저장
         travelUserRepository.save(travelUser);
         memberRepository.save(member);
+        guideRepository.save(guide);
+
         //friendRepository.save(friend);
 
         // 나중에 다른 엔티티를 추가하거나 업데이트할 수 있습니다.
@@ -155,14 +168,24 @@ public class TravelUserService {
             return null;
 
         TravelUser travelUser = optionalTravelUser.get();
-        if (travelUserDto.getName() != null)
+        Optional<Guide> optionalGuide = guideRepository.findByTravelUser(travelUser);
+
+        if (travelUserDto.getName() != null) {
             travelUser.setName(travelUserDto.getName());
-        if (travelUserDto.getGender() != null)
+            optionalGuide.get().setName(travelUserDto.getName());
+        }
+        if (travelUserDto.getGender() != null) {
             travelUser.setGender(travelUserDto.getGender());
-        if (travelUserDto.getAge() != null)
+            optionalGuide.get().setGender(travelUserDto.getGender());
+        }
+        if (travelUserDto.getAge() != null) {
             travelUser.setAge(travelUserDto.getAge());
-        if (travelUserDto.getAddress() != null)
+            optionalGuide.get().setAge(travelUserDto.getAge());
+        }
+        if (travelUserDto.getAddress() != null) {
             travelUser.setAddress(travelUserDto.getAddress());
+            optionalGuide.get().setArea(travelUserDto.getAddress());
+        }
         if (travelUserDto.getPhoneNumber() != null)
             travelUser.setPhoneNumber(travelUserDto.getPhoneNumber());
         if (travelUserDto.getImageUrl() != null)
@@ -171,6 +194,7 @@ public class TravelUserService {
             travelUser.setIntroduction(travelUserDto.getIntroduction());
 
         travelUserRepository.save(travelUser);
+        guideRepository.save(optionalGuide.get());
 
         return convertToDto(travelUser, travelUser.getMember());
     }
