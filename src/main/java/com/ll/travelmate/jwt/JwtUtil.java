@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -63,15 +65,25 @@ public class JwtUtil {
           .signWith(this.key)
           .compact();
 
-        Cookie cookie = new Cookie(JwtSettingUtil.JWTTOKENNAME, jwt);
-        cookie.setMaxAge(JwtSettingUtil.COOKIEMAXAGE);
-        cookie.setSecure(true);
-        cookie.setHttpOnly(false);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(JwtSettingUtil.JWTTOKENNAME, jwt)
+            .maxAge(JwtSettingUtil.COOKIEMAXAGE)
+            .secure(true)
+            .httpOnly(false)
+            .path("/")
+            .sameSite("None")
+            .build();
 
-        response.addHeader("Set-Cookie", String.format("%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
-        cookie.getName(), cookie.getValue(), cookie.getMaxAge())); // SameSite 속성 공부하기
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+//        Cookie cookie = new Cookie(JwtSettingUtil.JWTTOKENNAME, jwt);
+//        cookie.setMaxAge(JwtSettingUtil.COOKIEMAXAGE);
+//        cookie.setSecure(true);
+//        cookie.setHttpOnly(false);
+//        cookie.setPath("/");
+//        response.addCookie(cookie);
+//
+//        response.addHeader("Set-Cookie", String.format("%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
+//        cookie.getName(), cookie.getValue(), cookie.getMaxAge())); // SameSite 속성 공부하기
 
         System.out.println("createJwtToken func : " + jwt);
 
@@ -91,15 +103,25 @@ public class JwtUtil {
           .signWith(this.key)
           .compact();
 
-        Cookie refreshTokenCookie = new Cookie(JwtSettingUtil.JWTREFRESHTOKENNAME, jwtRefresh);
-        refreshTokenCookie.setMaxAge(JwtSettingUtil.REFRESHCOOKIEMAXAGE);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setHttpOnly(false);
-        refreshTokenCookie.setPath("/");
-        response.addCookie(refreshTokenCookie);
+        ResponseCookie refreshTokenCookie = ResponseCookie.from(JwtSettingUtil.JWTREFRESHTOKENNAME, jwtRefresh)
+            .maxAge(JwtSettingUtil.REFRESHCOOKIEMAXAGE)
+            .secure(true)
+            .httpOnly(false)
+            .path("/")
+            .sameSite("None")
+            .build();
 
-        response.addHeader("Set-Cookie", String.format("%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
-        refreshTokenCookie.getName(), refreshTokenCookie.getValue(), refreshTokenCookie.getMaxAge())); // SameSite 속성 공부하기
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+//        Cookie refreshTokenCookie = new Cookie(JwtSettingUtil.JWTREFRESHTOKENNAME, jwtRefresh);
+//        refreshTokenCookie.setMaxAge(JwtSettingUtil.REFRESHCOOKIEMAXAGE);
+//        refreshTokenCookie.setSecure(true);
+//        refreshTokenCookie.setHttpOnly(false);
+//        refreshTokenCookie.setPath("/");
+//        response.addCookie(refreshTokenCookie);
+//
+//        response.addHeader("Set-Cookie", String.format("%s=%s; Max-Age=%d; Path=/; HttpOnly; Secure; SameSite=None",
+//        refreshTokenCookie.getName(), refreshTokenCookie.getValue(), refreshTokenCookie.getMaxAge())); // SameSite 속성 공부하기
 
         System.out.println("createJwtRefreshToken func : " + jwtRefresh);
 
