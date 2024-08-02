@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface TravelUserRepository extends JpaRepository<TravelUser, Long> {
     List<TravelUser> findByTravelUserIdIn(List<Long> ids);
+    List<TravelUser> findByTravelUserIdInAndTravelUserIdNotIn(List<Long> includeIds, List<Long> excludeIds);
 }

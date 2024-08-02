@@ -1,5 +1,7 @@
 package com.ll.travelmate.user;
 
+import com.ll.travelmate.cart.Cart;
+import com.ll.travelmate.cart.CartRepository;
 import com.ll.travelmate.friend.Friend;
 import com.ll.travelmate.friend.FriendRepository;
 import com.ll.travelmate.friend.FriendStatus;
@@ -9,6 +11,8 @@ import com.ll.travelmate.member.CustomMember;
 import com.ll.travelmate.member.Member;
 import com.ll.travelmate.member.MemberDto;
 import com.ll.travelmate.member.MemberRepository;
+import com.ll.travelmate.user.externalapi.CompatibilityDto;
+import com.ll.travelmate.user.externalapi.RecommendedUsersDto;
 import com.ll.travelmate.util.UrlUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class TravelUserService {
     private final MemberRepository memberRepository;
     private final FriendRepository friendRepository;
     private final GuideRepository guideRepository;
+    private final CartRepository cartRepository;
     private final PasswordEncoder passwordEncoder;
     private final RestTemplate restTemplate;
 
@@ -77,8 +79,8 @@ public class TravelUserService {
     public TravelUserDto createUserAndMember(TravelUserDto travelUserDto, MemberDto memberDto) {
         TravelUser travelUser = new TravelUser();
         Member member = new Member();
-        Friend friend = new Friend();
         Guide guide = new Guide();
+        Cart cart = new Cart();
 
         travelUser.setName(travelUserDto.getName());
         travelUser.setGender(travelUserDto.getGender());
@@ -93,30 +95,30 @@ public class TravelUserService {
         member.setPassword(passwordEncoder.encode(memberDto.getPassword()));
         member.setTravelUser(travelUser);
 
-        // Friend 생성
-
-        // Block 생성
-
         // Guide 생성
         guide.setAge(travelUserDto.getAge());
         guide.setName(travelUserDto.getName());
         guide.setGender(travelUserDto.getGender());
         guide.setArea(travelUserDto.getAddress());
         guide.setRating(0.0);
+        guide.setTotalValue(0.0);
+        guide.setReviewCounter(0);
         guide.setTravelUser(travelUser);
+
+        // Cart 생성
+        cart.setTravelUser(travelUser);
 
         // TravelUser와 연결
         travelUser.setMember(member);
         travelUser.setGuide(guide);
+        travelUser.setCart(cart);
 
         // DB 저장
         travelUserRepository.save(travelUser);
         memberRepository.save(member);
         guideRepository.save(guide);
+        cartRepository.save(cart);
 
-        //friendRepository.save(friend);
-
-        // 나중에 다른 엔티티를 추가하거나 업데이트할 수 있습니다.
         return convertToDto(travelUser, member);
     }
 
@@ -126,6 +128,13 @@ public class TravelUserService {
             return null;
 
         Optional<TravelUser> optionalTravelUser = travelUserRepository.findById(customMember.getTravelUserId());
+
+        return optionalTravelUser.map(travelUser -> convertToDto(travelUser, travelUser.getMember())).orElse(null);
+    }
+
+    @Transactional
+    public TravelUserDto readOtherTravelUser(Long id) {
+        Optional<TravelUser> optionalTravelUser = travelUserRepository.findById(id);
 
         return optionalTravelUser.map(travelUser -> convertToDto(travelUser, travelUser.getMember())).orElse(null);
     }
@@ -142,18 +151,83 @@ public class TravelUserService {
         return travelUserDtos;
     }
 
-    public List<TravelUserDto> findRecommendedTravelUsers(String uri, String keyName) {
+    public CompatibilityDto findAddCompatibilityRecommendedTravelUsers(String uri, String keyName) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
+        ResponseEntity<CompatibilityDto> response = restTemplate.exchange(
+                UrlUtil.OTHERSERVERURL + uri,
+                HttpMethod.GET,
+                requestEntity,
+                new ParameterizedTypeReference<>() {
+                });
+
+        CompatibilityDto compatibilityDto = response.getBody();
+        Long myTravelUserId = Objects.requireNonNull(compatibilityDto).getSelf().getTravel_user_id();
+        List<RecommendedUsersDto> recommendedUsersDtos = Objects.requireNonNull(compatibilityDto).getList();
+        Set<Long> compatibilityIds = new HashSet<>();
+
+        for (RecommendedUsersDto recommendedUsersDto : recommendedUsersDtos) { // id 추출
+            compatibilityIds.add(recommendedUsersDto.getTravel_user_id());
+        }
+
+        Optional<TravelUser> travelUserOptional = travelUserRepository.findById(myTravelUserId);
+
+        if (travelUserOptional.isEmpty())
+            return null; // 잘못된 유저정보
+
+        List<Friend> acceptFriends = friendRepository.findByTravelUserAndFriendStatus(travelUserOptional.get(), FriendStatus.acceptance);
+        List<Friend> refuseFriends = friendRepository.findByTravelUserAndFriendStatus(travelUserOptional.get(), FriendStatus.refuse);
+        List<Friend> blockFriends = friendRepository.findByTravelUserAndFriendStatus(travelUserOptional.get(), FriendStatus.block);
+        List<Friend> friends = new ArrayList<>();
+
+        friends.addAll(acceptFriends);
+        friends.addAll(refuseFriends);
+        friends.addAll(blockFriends);
+
+        System.out.println(friends.size());
+
+        Set<Long> friendIds = new HashSet<>();
+
+        for (Friend friend : friends) { // 친구 id 추출
+            friendIds.add(friend.getFriendTravelUser().getTravelUserId());
+        }
+
+        System.out.println("fri"+friendIds.toString());
+
+        Set<Long> difference = new HashSet<>(compatibilityIds);
+        difference.removeAll(friendIds); // 친구 제외
+
+        System.out.println("diff"+difference.toString());
+
+        CompatibilityDto newCompatibilityDto = new CompatibilityDto();
+        newCompatibilityDto.setSelf(compatibilityDto.getSelf());
+        newCompatibilityDto.setList(new ArrayList<>());
+
+        for (RecommendedUsersDto recommendedUsersDto : recommendedUsersDtos) { // id 추출
+            if (difference.contains(recommendedUsersDto.getTravel_user_id()))
+                newCompatibilityDto.getList().add(recommendedUsersDto);
+        }
+
+        return newCompatibilityDto;
+    }
+
+    public List<TravelUserDto> findRecommendedTravelUsers(String uri, String keyName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+        System.out.println(uri);
         ResponseEntity<Map<String, List<Long>>> response = restTemplate.exchange(
                 UrlUtil.OTHERSERVERURL + uri,
                 HttpMethod.GET,
                 requestEntity,
                 new ParameterizedTypeReference<>() {
                 });
+
+        System.out.println(response.getBody().toString());
 
         // 응답 본문 추출
         Map<String,  List<Long>> responseBody = response.getBody();

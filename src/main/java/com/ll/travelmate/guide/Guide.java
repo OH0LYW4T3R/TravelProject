@@ -29,6 +29,8 @@ public class Guide {
     private Gender gender;
     private Integer age;
     private String area;
+    private Double totalValue;
+    private Integer reviewCounter;
 
     @OneToOne
     @JoinColumn(name = "travel_user_id")

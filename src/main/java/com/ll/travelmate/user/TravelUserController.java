@@ -2,6 +2,7 @@ package com.ll.travelmate.user;
 
 import com.ll.travelmate.member.CustomMember;
 import com.ll.travelmate.request.UserRegistrationRequest;
+import com.ll.travelmate.user.externalapi.CompatibilityDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +31,31 @@ public class TravelUserController {
         return new ResponseEntity<>(createdUserDto, HttpStatus.CREATED);
     }
 
+    @GetMapping("/compatibility-recommendation-list")
+    public ResponseEntity<Object> getAddCompatibilityRecommendedList(Authentication auth) {
+        String uri = "persona/recommend/";
+        String keyName = "list";
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        CompatibilityDto compatibilityDto;
+
+        try {
+            compatibilityDto = travelUserService.findAddCompatibilityRecommendedTravelUsers(uri + String.valueOf(customMember.getTravelUserId()) + "/", keyName);
+        } catch (Exception exception) {
+            return new ResponseEntity<>("Server Error", HttpStatus.valueOf(500));
+        }
+
+        return new ResponseEntity<>(compatibilityDto, HttpStatus.OK);
+    }
+
     @GetMapping("/recommendation-list")
     public ResponseEntity<Object> getRecommendedList(Authentication auth) {
-        String uri = "persona/recommend/";
+        String uri = "persona/list/";
         String keyName = "list";
         CustomMember customMember = (CustomMember) auth.getPrincipal();
         List<TravelUserDto> travelUserDtos = new ArrayList<>();
 
         try {
-            travelUserDtos = travelUserService.findRecommendedTravelUsers(uri + String.valueOf(customMember.getTravelUserId()), keyName);
+            travelUserDtos = travelUserService.findRecommendedTravelUsers(uri + String.valueOf(customMember.getTravelUserId()) + "/", keyName);
         } catch (Exception exception) {
             return new ResponseEntity<>("Server Error", HttpStatus.valueOf(500));
         }
@@ -50,6 +67,13 @@ public class TravelUserController {
     public ResponseEntity<Object> readTravelUser(Authentication auth) {
         CustomMember customMember = (CustomMember) auth.getPrincipal();
         TravelUserDto travelUserDto = travelUserService.readTravelUser(customMember);
+        return new ResponseEntity<>(travelUserDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/reading/{id}")
+    public ResponseEntity<Object> readOtherTravelUser(@PathVariable Long id, Authentication auth) {
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        TravelUserDto travelUserDto = travelUserService.readOtherTravelUser(id);
         return new ResponseEntity<>(travelUserDto, HttpStatus.OK);
     }
 

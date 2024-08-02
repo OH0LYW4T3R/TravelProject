@@ -1,6 +1,7 @@
 package com.ll.travelmate.user;
 
 import com.ll.travelmate.block.Block;
+import com.ll.travelmate.cart.Cart;
 import com.ll.travelmate.friend.Friend;
 import com.ll.travelmate.guide.Guide;
 import com.ll.travelmate.member.Member;
@@ -39,6 +40,8 @@ public class TravelUser {
     @OneToOne(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // mappedBy에 연관관계의 주인 필드 이름을 넣어주면 된다.
     @ToString.Exclude
     private Member member;
+    @OneToOne(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Cart cart; // 추가
     @OneToOne(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Guide guide;
     @OneToOne(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

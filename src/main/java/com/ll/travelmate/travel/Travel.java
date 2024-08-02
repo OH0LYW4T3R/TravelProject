@@ -8,6 +8,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -19,12 +21,14 @@ public class Travel {
     private LocalDateTime travelStartDate;
     private LocalDateTime travelEndDate;
     private String location;
+    private Double latitude;
+    private Double longitude;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="travel_user_id")
     private TravelUser travelUser;
     @OneToOne // 단방향
     @JoinColumn(name = "mate_id")
     private TravelUser mateUser;
-    @OneToOne(mappedBy = "travel")
-    private TravelRoute travelRoute;
+    @OneToMany(mappedBy = "travel")
+    private List<TravelRoute> travelRoute = new ArrayList<>();
 }

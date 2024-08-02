@@ -25,6 +25,7 @@ public class GuideReview {
     private Double rating;
     @CreationTimestamp
     private LocalDateTime createdAt;
+    private Long guideProposalId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guide_id")

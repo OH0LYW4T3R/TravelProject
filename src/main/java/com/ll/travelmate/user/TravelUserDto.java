@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.ll.travelmate.block.BlockDto;
+import com.ll.travelmate.cart.Cart;
 import com.ll.travelmate.friend.FriendDto;
 import com.ll.travelmate.guide.GuideDto;
 import com.ll.travelmate.member.MemberDto;
@@ -45,6 +46,7 @@ public class TravelUserDto {
     private MemberDto member;
     private GuideDto guide;
     private TravelSettingDto travelSetting;
+    private Cart cart;
     private List<FriendDto> friends;
     private List<BlockDto> blocks;
     private List<TravelDto> travels;
