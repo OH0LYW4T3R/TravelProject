@@ -5,6 +5,7 @@ import com.ll.travelmate.cart.Cart;
 import com.ll.travelmate.friend.Friend;
 import com.ll.travelmate.guide.Guide;
 import com.ll.travelmate.member.Member;
+import com.ll.travelmate.proposal.Proposal;
 import com.ll.travelmate.travel.Travel;
 import com.ll.travelmate.travelsetting.TravelSetting;
 import jakarta.persistence.*;
@@ -48,9 +49,11 @@ public class TravelUser {
     private TravelSetting travelSetting;
 
     @OneToMany(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // mappedBy에 연관관계의 주인 필드 이름을 넣어주면 된다.
-    List<Friend> friends = new ArrayList<>();
+    private List<Friend> friends = new ArrayList<>();
     @OneToMany(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // mappedBy에 연관관계의 주인 필드 이름을 넣어주면 된다.
-    List<Block> blocks = new ArrayList<>();
+    private List<Block> blocks = new ArrayList<>();
     @OneToMany(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    List<Travel> travels = new ArrayList<>();
+    private List<Travel> travels = new ArrayList<>();
+    @OneToMany(mappedBy = "travelUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Proposal> proposal = new ArrayList<>();
 }
