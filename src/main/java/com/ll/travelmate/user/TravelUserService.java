@@ -157,12 +157,16 @@ public class TravelUserService {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
+        System.out.println("test1");
+
         ResponseEntity<CompatibilityDto> response = restTemplate.exchange(
                 UrlUtil.OTHERSERVERURL + uri,
                 HttpMethod.GET,
                 requestEntity,
                 new ParameterizedTypeReference<>() {
                 });
+
+        System.out.println("test2");
 
         CompatibilityDto compatibilityDto = response.getBody();
         Long myTravelUserId = Objects.requireNonNull(compatibilityDto).getSelf().getTravel_user_id();
