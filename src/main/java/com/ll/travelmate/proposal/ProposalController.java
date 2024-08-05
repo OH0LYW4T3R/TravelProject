@@ -39,13 +39,34 @@ public class ProposalController {
         return new ResponseEntity<>(proposalDtos, HttpStatus.OK);
     }
 
+    @GetMapping("/reading/acceptance")
+    public ResponseEntity<Object> readAcceptProposal(Authentication auth) {
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        List<ProposalDto> proposalDtos = proposalService.readOfferOrOfferedProposal(customMember.getTravelUserId(), ProposalStatus.acceptance);
+        return new ResponseEntity<>(proposalDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/reading/refusal")
+    public ResponseEntity<Object> readRefusalProposal(Authentication auth) {
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        List<ProposalDto> proposalDtos = proposalService.readOfferOrOfferedProposal(customMember.getTravelUserId(), ProposalStatus.refusal);
+        return new ResponseEntity<>(proposalDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/reading/{id}")
+    public ResponseEntity<Object> readDetailProposal(@PathVariable Long id, Authentication auth) {
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        ProposalDto proposalDto = proposalService.readDetailProposal(id);
+        return new ResponseEntity<>(proposalDto, HttpStatus.OK);
+    }
+
     @PatchMapping("/acceptance")
     public ResponseEntity<Object> acceptProposal(@RequestBody ProposalDto proposalDto, Authentication auth) {
         CustomMember customMember = (CustomMember) auth.getPrincipal();
         ProposalDto acceptProposalDto = proposalService.acceptProposal(customMember.getTravelUserId(), proposalDto);
 
         if (acceptProposalDto == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("접근할 수 없는 상대입니다", HttpStatus.BAD_REQUEST);
 
         return new ResponseEntity<>(acceptProposalDto, HttpStatus.OK);
     }
@@ -53,7 +74,14 @@ public class ProposalController {
     @PatchMapping("/refusal")
     public ResponseEntity<Object> refuseProposal(@RequestBody ProposalDto proposalDto, Authentication auth) {
         CustomMember customMember = (CustomMember) auth.getPrincipal();
-
+        proposalService.refuseProposal(customMember.getTravelUserId(), proposalDto);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deletion")
+    public ResponseEntity<Object> deleteProposal(@RequestBody ProposalDto proposalDto, Authentication auth) {
+        CustomMember customMember = (CustomMember) auth.getPrincipal();
+        proposalService.deleteProposal(customMember.getTravelUserId(), proposalDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -11,6 +11,9 @@ import com.ll.travelmate.member.CustomMember;
 import com.ll.travelmate.member.Member;
 import com.ll.travelmate.member.MemberDto;
 import com.ll.travelmate.member.MemberRepository;
+import com.ll.travelmate.proposal.Proposal;
+import com.ll.travelmate.proposal.ProposalRepository;
+import com.ll.travelmate.proposal.ProposalStatus;
 import com.ll.travelmate.user.externalapi.CompatibilityDto;
 import com.ll.travelmate.user.externalapi.RecommendedUsersDto;
 import com.ll.travelmate.util.UrlUtil;
@@ -32,6 +35,7 @@ public class TravelUserService {
     private final FriendRepository friendRepository;
     private final GuideRepository guideRepository;
     private final CartRepository cartRepository;
+    private final ProposalRepository proposalRepository;
     private final PasswordEncoder passwordEncoder;
     private final RestTemplate restTemplate;
 
@@ -284,6 +288,9 @@ public class TravelUserService {
         List<Friend> requestFriends = friendRepository.findByTravelUserAndFriendStatus(travelUserOptional.get(), FriendStatus.request);
         List<Friend> acceptanceFriends = friendRepository.findByTravelUserAndFriendStatus(travelUserOptional.get(), FriendStatus.acceptance);
         List<Friend> refuseFriends = friendRepository.findByTravelUserAndFriendStatus(travelUserOptional.get(), FriendStatus.refuse);
+        List<Proposal> offerProposals = proposalRepository.findByTravelUserAndProposalStatus(travelUserOptional.get(), ProposalStatus.offer);
+        List<Proposal> acceptProposals = proposalRepository.findByTravelUserAndProposalStatus(travelUserOptional.get(), ProposalStatus.acceptance);
+
 
         for (Friend friend : requestFriends) {
             Optional<Friend> standByFriendOptional = friendRepository.findByTravelUserAndFriendTravelUserAndFriendStatus(
@@ -310,6 +317,26 @@ public class TravelUserService {
                     FriendStatus.refuse
             );
             refuseFriendOptional.ifPresent(friendRepository::delete);
+        }
+
+        for (Proposal proposal : offerProposals) {
+            Optional<Proposal> proposalOptional = proposalRepository.findByTravelUserAndOfferedTravelUserAndProposalStatus(
+                    proposal.getOfferedTravelUser(),
+                    proposal.getTravelUser(),
+                    ProposalStatus.offered
+            );
+
+            proposalOptional.ifPresent(proposalRepository::delete);
+        }
+
+        for (Proposal proposal : acceptProposals) {
+            Optional<Proposal> proposalOptional = proposalRepository.findByTravelUserAndOfferedTravelUserAndProposalStatus(
+                    proposal.getOfferedTravelUser(),
+                    proposal.getTravelUser(),
+                    ProposalStatus.acceptance
+            );
+
+            proposalOptional.ifPresent(proposalRepository::delete);
         }
 
         travelUserRepository.deleteById(travelUserId);
