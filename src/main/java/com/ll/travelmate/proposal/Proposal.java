@@ -31,5 +31,6 @@ public class Proposal {
     private LocalDateTime refuseTime;
     @CreationTimestamp
     private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
     private ProposalStatus proposalStatus;
 }
