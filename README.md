@@ -32,7 +32,7 @@
 ## 개발 개요
 - ### 맡은 역할
   ### 백엔드
-  REST API를 이용하여, 로그인, 유저 정보, 장바구니 관리, 친구 관리, 현지 가이드 관리, 현지 가이드 제안 관리, 여행, 여행 루트 관리 백엔드 서버를 만들었으며 총 58개 엔드포인트 개발, 또한 각 객체에 대한 정보를 저장해야 하므로 데이터베이스 설계와 개발 진행
+  프론트에서 직접 페이지를 렌더링 하는 CSR방식을 사용하기 위해 REST API방식을 사용하였고, 로그인, 유저 정보, 장바구니 관리, 친구 관리, 현지 가이드 관리, 현지 가이드 제안 관리, 여행, 여행 루트 관리 백엔드 서버를 만들었으며 총 58개 엔드포인트 개발, 또한 각 객체에 대한 정보를 저장해야 하므로 객체에 따른 8개의 Entity와 각 Entity와의 관계 설정, 데이터베이스 설계(데이터베이스는 호스팅 받아 사용)
 - ### 기술 스택
   #### 백엔드 프레임워크
   <img src="https://img.shields.io/badge/spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white"> <img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/springsecurity-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white">
